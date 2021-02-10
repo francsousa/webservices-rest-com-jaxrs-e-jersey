@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.francisco.loja.modelo.Carrinho;
+import com.francisco.loja.modelo.Projeto;
 import com.thoughtworks.xstream.XStream;
 
 public class ClienteTest {
@@ -42,9 +43,10 @@ public class ClienteTest {
 	public void testaQueAConexaoComOServidorFuncionaNoPathDeProjetos() {
 				
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080");
-		String conteudo = target.path("/projetos").request().get(String.class);
-		Assert.assertTrue(conteudo.contains("<nome>Minha loja"));
+        WebTarget target = client.target("http://localhost:8080");
+        String conteudo = target.path("/projetos").request().get(String.class);
+        Projeto projeto = (Projeto) new XStream().fromXML(conteudo);
+        assertEquals("Minha loja", projeto.getNome());
 	}
 	
 	@Test
