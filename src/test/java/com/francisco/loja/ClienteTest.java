@@ -1,13 +1,33 @@
 package com.francisco.loja;
 
+import static org.junit.Assert.assertEquals;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.francisco.loja.modelo.Carrinho;
+import com.thoughtworks.xstream.XStream;
+
 public class ClienteTest {
+	
+	private HttpServer server;
+
+	@Before
+	public void startaServidor() {
+		server = Servidor.inicializaServidor();
+	}
+	
+	@After
+	public void mataServidor() {
+		server.shutdownNow();
+	}
 	
 	@Test
 	public void testaQueAConexaoComOServidorFunciona() {
@@ -20,10 +40,22 @@ public class ClienteTest {
 	
 	@Test
 	public void testaQueAConexaoComOServidorFuncionaNoPathDeProjetos() {
-		
+				
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target("http://localhost:8080");
 		String conteudo = target.path("/projetos").request().get(String.class);
 		Assert.assertTrue(conteudo.contains("<nome>Minha loja"));
+	}
+	
+	@Test
+	public void testaQueBuscarUmCarrinhoTrazOCarrinhoEsperado() {
+		
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target("http://localhost:8080");
+		String conteudo = target.path("/carrinhos").request().get(String.class);
+		Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
+		assertEquals("Rua Vergueiro 3185, 8 andar", carrinho.getRua());
+		
+		server.shutdownNow();
 	}
 }
