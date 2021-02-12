@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.thoughtworks.xstream.XStream;
 
 public class Carrinho {
@@ -79,5 +80,9 @@ public class Carrinho {
 
 	public String toXML() {
 		return new XStream().toXML(this);
+	}
+
+	public String toJson() {
+		return new Gson().toJson(this);
 	}
 }
