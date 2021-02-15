@@ -6,6 +6,8 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.junit.After;
@@ -21,10 +23,14 @@ import com.thoughtworks.xstream.XStream;
 public class ClienteTest {
 	
 	private HttpServer server;
+	private WebTarget target;
+	private Client client;
 
 	@Before
 	public void startaServidor() {
 		server = Servidor.inicializaServidor();
+		this.client = ClientBuilder.newClient();
+		this.target = client.target("http://localhost:8080");
 	}
 	
 	@After
@@ -44,8 +50,6 @@ public class ClienteTest {
 	@Test
 	public void testaQueBuscarUmProjetoTrazOProjetoEsperado() {
 				
-		Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:8080");
         String conteudo = target.path("/projetos/1").request().get(String.class);
         Projeto projeto = (Projeto) new XStream().fromXML(conteudo);
         assertEquals("Minha loja", projeto.getNome());
@@ -54,26 +58,41 @@ public class ClienteTest {
 	@Test
 	public void testaQueBuscarUmCarrinhoTrazOCarrinhoEsperado() {
 		
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080");
 		String conteudo = target.path("/carrinhos/1").request().get(String.class);
 		Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
 		assertEquals("Rua Vergueiro 3185, 8 andar", carrinho.getRua());
-		
-		server.shutdownNow();
 	}
 	
 	@Test
 	public void testaQueSuportaNovosCarrinhos() {
-		Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:8080");
-        
-        Carrinho carrinho = new Carrinho();
-        carrinho.adiciona(new Produto(314L, "Tablet", 999, 1));
-        carrinho.setRua("Rua Vergueiro");
-        carrinho.setCidade("Sao Paulo");
-        String xml = carrinho.toXML();
-        String response = target.path("/carrinhos").request().post(Entity.xml(xml), String.class);
-        Assert.assertEquals("<status>sucesso</status>", response);
+		
+		Carrinho carrinho = new Carrinho();
+		carrinho.adiciona(new Produto(314, "Microfone", 37, 1));
+		carrinho.setRua("Rua Vergueiro 3185");
+		carrinho.setCidade("São Paulo");
+		String xml = carrinho.toXML();
+		Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
+		
+		Response response = target.path("/carrinhos").request().post(entity);
+		Assert.assertEquals(201, response.getStatus());
+		String location = response.getHeaderString("Location");
+		String conteudo = client.target(location).request().get(String.class);
+		Assert.assertTrue(conteudo.contains("Microfone"));
+	}
+	
+	@Test
+	public void testaQueSuportaNovosProjetos() {
+		
+		Projeto projeto = new Projeto();
+		projeto.setNome("Correr");
+		projeto.setAnoDeInicio(2021);
+		String xml = projeto.toXML();
+		Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
+		
+		Response response = target.path("/projetos").request().post(entity);
+		Assert.assertEquals(201, response.getStatus());
+		String location = response.getHeaderString("Location");
+		String conteudo = client.target(location).request().get(String.class);
+		Assert.assertTrue(conteudo.contains("Correr"));
 	}
 }

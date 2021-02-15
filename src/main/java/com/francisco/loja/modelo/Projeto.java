@@ -35,6 +35,14 @@ public class Projeto {
 		return anoDeInicio;
 	}
 	
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public void setAnoDeInicio(int anoDeInicio) {
+		this.anoDeInicio = anoDeInicio;
+	}
+
 	public String toXML() {
 		return new XStream().toXML(this);
 	}

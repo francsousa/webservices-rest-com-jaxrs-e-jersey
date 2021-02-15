@@ -1,15 +1,19 @@
 package com.francisco.loja.resource;
 
+import java.net.URI;
+
 import com.francisco.loja.dao.ProjetoDAO;
 import com.francisco.loja.modelo.Projeto;
 import com.thoughtworks.xstream.XStream;
 
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("projetos")
 public class ProjetoResource {
@@ -23,10 +27,11 @@ public class ProjetoResource {
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_XML)
-	public String adiciona(String conteudo) {
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response adiciona(String conteudo) {
 		Projeto projeto = (Projeto) new XStream().fromXML(conteudo);
 		new ProjetoDAO().adiciona(projeto);
-		return "<status>sucesso</status>";
+		URI uri = URI.create("/projetos/" + projeto.getId());
+		return Response.created(uri).build();
 	}
 }
