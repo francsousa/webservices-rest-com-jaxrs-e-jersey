@@ -7,6 +7,7 @@ import com.francisco.loja.modelo.Carrinho;
 import com.thoughtworks.xstream.XStream;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -33,5 +34,13 @@ public class CarrinhoResource {
 		new CarrinhoDAO().adiciona(carrinho);
 		URI uri = URI.create("/carrinhos/" + carrinho.getId());
 		return Response.created(uri).build();
+	}
+	
+	@Path("{id}/produtos/{produtoId}")
+	@DELETE
+	public Response removeProduto(@PathParam("id") long id, @PathParam("produtoId") long produtoId) {
+		Carrinho carrinho = new CarrinhoDAO().busca(id);
+		carrinho.remove(produtoId);
+		return Response.ok().build();
 	}
 }
