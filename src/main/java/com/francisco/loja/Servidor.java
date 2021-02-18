@@ -13,7 +13,7 @@ public class Servidor {
 		HttpServer server = inicializaServidor();
 		System.out.println("Servidor rodando");
 		System.in.read();
-		server.shutdownNow();
+		server.stop();
 	}
 
 	static HttpServer inicializaServidor() {

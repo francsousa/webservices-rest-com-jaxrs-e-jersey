@@ -1,6 +1,7 @@
 package com.francisco.loja;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -10,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,14 +31,16 @@ public class ClienteTest {
 
 	@Before
 	public void startaServidor() {
-		server = Servidor.inicializaServidor();
-		this.client = ClientBuilder.newClient();
-		this.target = client.target("http://localhost:8080");
-	}
+        this.server = Servidor.inicializaServidor();
+        ClientConfig config = new ClientConfig();
+        config.register(new LoggingFilter());
+        this.client = ClientBuilder.newClient(config);
+        this.target = client.target("http://localhost:8080");
+    }
 	
 	@After
 	public void mataServidor() {
-		server.shutdownNow();
+		server.stop();
 	}
 	
 	@Test
@@ -44,7 +49,7 @@ public class ClienteTest {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target("http://www.mocky.io");
 		String conteudo = target.path("/v2/52aaf5deee7ba8c70329fb7d").request().get(String.class);
-		Assert.assertTrue(conteudo.contains("<rua>Rua Vergueiro 3185"));
+		assertTrue(conteudo.contains("<rua>Rua Vergueiro 3185"));
 	}
 	
 	@Test
