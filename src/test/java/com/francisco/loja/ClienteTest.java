@@ -21,7 +21,6 @@ import org.junit.Test;
 import com.francisco.loja.modelo.Carrinho;
 import com.francisco.loja.modelo.Produto;
 import com.francisco.loja.modelo.Projeto;
-import com.thoughtworks.xstream.XStream;
 
 public class ClienteTest {
 	
@@ -55,8 +54,7 @@ public class ClienteTest {
 	@Test
 	public void testaQueBuscarUmProjetoTrazOProjetoEsperado() {
 				
-        String conteudo = target.path("/projetos/1").request().get(String.class);
-        Projeto projeto = (Projeto) new XStream().fromXML(conteudo);
+        Projeto projeto = target.path("/projetos/1").request().get(Projeto.class);
         assertEquals("Minha loja", projeto.getNome());
 	}
 	
@@ -90,13 +88,12 @@ public class ClienteTest {
 		Projeto projeto = new Projeto();
 		projeto.setNome("Correr");
 		projeto.setAnoDeInicio(2021);
-		String xml = projeto.toXML();
-		Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
+		Entity<Projeto> entity = Entity.entity(projeto, MediaType.APPLICATION_XML);
 		
 		Response response = target.path("/projetos").request().post(entity);
 		Assert.assertEquals(201, response.getStatus());
 		String location = response.getHeaderString("Location");
-		String conteudo = client.target(location).request().get(String.class);
-		Assert.assertTrue(conteudo.contains("Correr"));
+		Projeto projetoCarregado = client.target(location).request().get(Projeto.class);
+		Assert.assertEquals("Correr", projetoCarregado.getNome());
 	}
 }
